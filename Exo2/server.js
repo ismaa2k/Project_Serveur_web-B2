@@ -42,13 +42,14 @@ app.get("/getTasks", async (req, res) => {
 app.delete("/:taskId", async (req, res) => {
   try {
     const taskId = req.params.taskId;
-    await Task.findByIdAndRemove(taskId);
+    await Task.deleteOne({ _id: taskId }); // Utilisez deleteOne pour supprimer la tâche par son ID
     res.redirect("/"); // Redirige après la suppression
   } catch (err) {
     console.error(err);
     res.status(500).send("Erreur lors de la suppression de la tâche");
   }
 });
+
 
 // Route pour ajouter une nouvelle tâche
 app.post("/", async (req, res) => {

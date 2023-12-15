@@ -18,30 +18,72 @@
     </div>
 
     <script>
-      // Récupérer les tâches et les afficher dans la liste
-      fetch("/getTasks")
-        .then((response) => response.json())
-        .then((data) => {
-          const taskList = document.getElementById("taskList");
-          data.tasks.forEach((task) => {
-            const li = document.createElement("li");
-            li.textContent = task.description;
-
-            const deleteForm = document.createElement("form");
-            deleteForm.action = `/${task._id}`; // L'action pointe vers l'ID de la tâche
-            deleteForm.method = "POST"; // Utilise POST comme méthode
-            deleteForm.innerHTML = `
-              <input type="hidden" name="_method" value="DELETE"> <!-- Indique la méthode DELETE -->
-              <button type="submit">Supprimer</button>
-            `;
-
-            li.appendChild(deleteForm);
-            taskList.appendChild(li);
+      // Fonction pour supprimer une tâche
+      const deleteTask = async (taskId) => {
+        try {
+          await fetch(`/${taskId}`, {
+            method: "DELETE"
           });
-        })
-        .catch((error) =>
-          console.error("Erreur lors de la récupération des tâches :", error)
-        );
+          // Mettre à jour la liste des tâches après la suppression
+          fetchTasks();
+        } catch (error) {
+          console.error("Erreur lors de la suppression de la tâche :", error);
+        }
+      };
+  
+      // Fonction pour marquer une tâche comme terminée ou non terminée
+      const toggleTaskCompletion = async (taskId, completed) => {
+        try {
+          await fetch(`/${taskId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ completed }),
+          });
+          // Mettre à jour la liste des tâches après modification
+          fetchTasks();
+        } catch (error) {
+          console.error("Erreur lors du changement d'état de la tâche :", error);
+        }
+      };
+  
+      // Récupérer les tâches et les afficher dans la liste
+      const fetchTasks = () => {
+        fetch("/getTasks")
+          .then((response) => response.json())
+          .then((data) => {
+            const taskList = document.getElementById("taskList");
+            taskList.innerHTML = ""; // Vider la liste avant de la mettre à jour
+            data.tasks.forEach((task) => {
+              const li = document.createElement("li");
+  
+              const descriptionSpan = document.createElement("span");
+              descriptionSpan.textContent = task.description;
+  
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.checked = task.completed; // Indique si la tâche est terminée ou non
+              checkbox.addEventListener("change", () => toggleTaskCompletion(task._id, checkbox.checked));
+  
+              const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Supprimer";
+            deleteButton.addEventListener("click", () => deleteTask(task._id));
+
+            li.appendChild(checkbox);
+            li.appendChild(descriptionSpan);
+            li.appendChild(deleteButton);
+            taskList.appendChild(li);
+            });
+          })
+          .catch((error) =>
+            console.error("Erreur lors de la récupération des tâches :", error)
+          );
+      };
+  
+      // Appeler fetchTasks au chargement de la page pour afficher les tâches
+      fetchTasks();
     </script>
+
   </body>
 </html>
