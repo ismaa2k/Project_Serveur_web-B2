@@ -2,3 +2,8 @@ portfolio.exemple.localhost {
 	root * "C:\Users\ismaa\serveur-web\Exo1"
 	file_server browse
 }
+
+localhost
+
+reverse_proxy localhost:3000
+
