@@ -1,7 +1,8 @@
 todo.exemple.localhost {
     root * "C:\Users\ismaa\serveur-web\Exo2"
     file_server browse
-    reverse_proxy localhost:3000
+    reverse_proxy localhost:3000 
+    reverse_proxy localhost:3001 
 
     encode gzip brotli
 }

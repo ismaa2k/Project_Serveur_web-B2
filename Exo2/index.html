@@ -1,89 +1,112 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>Todolist</title>
-  </head>
-  <body>
-    <h1>Todolist</h1>
-    <form action="/" method="post">
-      <label for="description">Nouvelle tâche:</label>
-      <input type="text" id="description" name="description" required />
-      <button type="submit">Ajouter</button>
-    </form>
-    <div class="task-list">
-      <ul id="taskList"></ul>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Todolist</title>
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Todolist</h1>
+  <form action="/" method="post">
+    <label for="description">Nouvelle tâche:</label>
+    <input type="text" id="description" name="description" required />
+    <button type="submit">Ajouter</button>
+  </form>
+  <div class="task-list">
+    <ul id="taskList"></ul>
+  </div>
+  <button id="loadMore">Afficher plus</button>
+  
+  <script>
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch("/getTasks");
+        const data = await response.json();
+        const taskList = document.getElementById("taskList");
 
-    <script>
-      // Fonction pour supprimer une tâche
-      const deleteTask = async (taskId) => {
-        try {
-          await fetch(`/${taskId}`, {
-            method: "DELETE"
-          });
-          // Mettre à jour la liste des tâches après la suppression
-          fetchTasks();
-        } catch (error) {
-          console.error("Erreur lors de la suppression de la tâche :", error);
+        taskList.innerHTML = '';
+
+        data.tasks.forEach((task, index) => {
+          const li = document.createElement("li");
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.completed;
+          checkbox.addEventListener("change", () => toggleTaskCompletion(task._id, checkbox.checked));
+
+          const taskDescription = document.createElement("span");
+          taskDescription.textContent = task.description;
+
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "Supprimer";
+          deleteButton.addEventListener("click", () => deleteTask(task._id));
+
+          li.appendChild(checkbox);
+          li.appendChild(taskDescription);
+          li.appendChild(deleteButton);
+          taskList.appendChild(li);
+
+          if (index >= 2) {
+            li.classList.add('hidden');
+          }
+        });
+
+        const hiddenTasks = document.querySelectorAll('.task-list .hidden');
+        if (hiddenTasks.length === 0) {
+          document.getElementById('loadMore').style.display = 'none';
         }
-      };
-  
-      // Fonction pour marquer une tâche comme terminée ou non terminée
-      const toggleTaskCompletion = async (taskId, completed) => {
-        try {
-          await fetch(`/${taskId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ completed }),
-          });
-          // Mettre à jour la liste des tâches après modification
-          fetchTasks();
-        } catch (error) {
-          console.error("Erreur lors du changement d'état de la tâche :", error);
-        }
-      };
-  
-      // Récupérer les tâches et les afficher dans la liste
-      const fetchTasks = () => {
-        fetch("/getTasks")
-          .then((response) => response.json())
-          .then((data) => {
-            const taskList = document.getElementById("taskList");
-            taskList.innerHTML = ""; // Vider la liste avant de la mettre à jour
-            data.tasks.forEach((task) => {
-              const li = document.createElement("li");
-  
-              const descriptionSpan = document.createElement("span");
-              descriptionSpan.textContent = task.description;
-  
-              const checkbox = document.createElement("input");
-              checkbox.type = "checkbox";
-              checkbox.checked = task.completed; // Indique si la tâche est terminée ou non
-              checkbox.addEventListener("change", () => toggleTaskCompletion(task._id, checkbox.checked));
-  
-              const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Supprimer";
-            deleteButton.addEventListener("click", () => deleteTask(task._id));
+      } catch (error) {
+        console.error("Erreur lors de la récupération des tâches :", error);
+      }
+    };
 
-            li.appendChild(checkbox);
-            li.appendChild(descriptionSpan);
-            li.appendChild(deleteButton);
-            taskList.appendChild(li);
-            });
-          })
-          .catch((error) =>
-            console.error("Erreur lors de la récupération des tâches :", error)
-          );
-      };
-  
-      // Appeler fetchTasks au chargement de la page pour afficher les tâches
-      fetchTasks();
-    </script>
+    const deleteTask = async (taskId) => {
+      try {
+        await fetch(`/${taskId}`, {
+          method: "DELETE"
+        });
 
-  </body>
+        fetchTasks();
+      } catch (error) {
+        console.error("Erreur lors de la suppression de la tâche :", error);
+      }
+    };
+
+    const toggleTaskCompletion = async (taskId, completed) => {
+      try {
+        await fetch(`/${taskId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ completed }),
+        });
+
+        fetchTasks();
+      } catch (error) {
+        console.error("Erreur lors du changement d'état de la tâche :", error);
+      }
+    };
+
+    const toggleHiddenTasks = () => {
+      const hiddenTasks = document.querySelectorAll('.task-list .hidden');
+      hiddenTasks.forEach(task => {
+        task.classList.remove('hidden');
+      });
+
+      document.getElementById('loadMore').style.display = 'none';
+    };
+
+    document.getElementById('loadMore').addEventListener('click', toggleHiddenTasks);
+
+    // Appeler fetchTasks au chargement de la page pour récupérer les tâches depuis la base de données
+    fetchTasks();
+  </script>
+</body>
 </html>

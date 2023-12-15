@@ -1,18 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
-const app = express();
-const port = process.env.PORT || 3000;
-
-
-
+const app1 = express();
+const port1 = process.env.PORT || 3001;
 
 const methodOverride = require("method-override");
-app.use(methodOverride("_method"));
+app1.use(methodOverride("_method"));
 
 // Configuration du moteur de modèle EJS
-app.set("view engine", "ejs"); // Utilisation de EJS comme moteur de modèle
-app.set("views", path.join(__dirname, "views")); // Chemin vers le répertoire des vues
+app1.set("view engine", "ejs"); // Utilisation de EJS comme moteur de modèle
+app1.set("views", path.join(__dirname, "views")); // Chemin vers le répertoire des vues
 
 // Connexion à MongoDB
 mongoose.connect("mongodb://127.0.0.1/todolist", {
@@ -24,15 +21,15 @@ mongoose.connect("mongodb://127.0.0.1/todolist", {
 const Task = mongoose.model("Task", { description: String });
 
 // Middleware pour parser le corps des requêtes en JSON
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app1.use(express.json());
+app1.use(express.urlencoded({ extended: true }));
 
 // Route pour afficher la liste des tâches
-app.get("/", (req, res) => {
+app1.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get("/getTasks", async (req, res) => {
+app1.get("/getTasks", async (req, res) => {
   const limit = parseInt(req.query.limit) || 3; // Limite le nombre de tâches par défaut à 3
   const page = parseInt(req.query.page) || 1; // Récupère le numéro de page, par défaut 1
   
@@ -48,7 +45,7 @@ app.get("/getTasks", async (req, res) => {
   }
 });
 
-app.delete("/:taskId", async (req, res) => {
+app1.delete("/:taskId", async (req, res) => {
   try {
     const taskId = req.params.taskId;
     await Task.deleteOne({ _id: taskId }); // Utilisez deleteOne pour supprimer la tâche par son ID
@@ -61,7 +58,7 @@ app.delete("/:taskId", async (req, res) => {
 
 
 // Route pour ajouter une nouvelle tâche
-app.post("/", async (req, res) => {
+app1.post("/", async (req, res) => {
   try {
     const task = new Task({ description: req.body.description });
     await task.save();
@@ -73,6 +70,6 @@ app.post("/", async (req, res) => {
 });
 
 // Démarrage du serveur
-app.listen(port, () => {
-  console.log(`Serveur démarré sur http://localhost:${port}`);
+app1.listen(port1, () => {
+  console.log(`Serveur démarré sur http://localhost:${port1}`);
 });
