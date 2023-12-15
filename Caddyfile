@@ -1,3 +1,4 @@
 portfolio.exemple.localhost {
-    root * 
+	root * "C:\Users\ismaa\serveur-web"
+	file_server browse
 }
