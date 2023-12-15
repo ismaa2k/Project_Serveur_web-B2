@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <script src="client.js" defer></script>
     <title>Todolist</title>
   </head>
   <body>
@@ -15,36 +14,34 @@
       <button type="submit">Ajouter</button>
     </form>
     <div class="task-list">
-      <ul id="taskList">
-        <script>
-          fetch("/getTasks")
-            .then((response) => response.json())
-            .then((data) => {
-              const taskList = document.getElementById("taskList");
-              data.tasks.forEach((task) => {
-                const li = document.createElement("li");
-                li.textContent = task.description;
+      <ul id="taskList"></ul>
+    </div>
 
-                const deleteForm = document.createElement("form");
-                deleteForm.action = `/${task._id}`;
-                deleteForm.method = "POST";
-                deleteForm.innerHTML = `
-              <input type="hidden" name="_method" value="DELETE">
+    <script>
+      // Récupérer les tâches et les afficher dans la liste
+      fetch("/getTasks")
+        .then((response) => response.json())
+        .then((data) => {
+          const taskList = document.getElementById("taskList");
+          data.tasks.forEach((task) => {
+            const li = document.createElement("li");
+            li.textContent = task.description;
+
+            const deleteForm = document.createElement("form");
+            deleteForm.action = `/${task._id}`; // L'action pointe vers l'ID de la tâche
+            deleteForm.method = "POST"; // Utilise POST comme méthode
+            deleteForm.innerHTML = `
+              <input type="hidden" name="_method" value="DELETE"> <!-- Indique la méthode DELETE -->
               <button type="submit">Supprimer</button>
             `;
 
-                li.appendChild(deleteForm);
-                taskList.appendChild(li);
-              });
-            })
-            .catch((error) =>
-              console.error(
-                "Erreur lors de la récupération des tâches :",
-                error
-              )
-            );
-        </script>
-      </ul>
-    </div>
+            li.appendChild(deleteForm);
+            taskList.appendChild(li);
+          });
+        })
+        .catch((error) =>
+          console.error("Erreur lors de la récupération des tâches :", error)
+        );
+    </script>
   </body>
 </html>

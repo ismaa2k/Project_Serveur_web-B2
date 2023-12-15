@@ -43,12 +43,13 @@ app.delete("/:taskId", async (req, res) => {
   try {
     const taskId = req.params.taskId;
     await Task.findByIdAndRemove(taskId);
-    res.redirect("/");
+    res.redirect("/"); // Redirige après la suppression
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erreur de serveur");
+    res.status(500).send("Erreur lors de la suppression de la tâche");
   }
 });
+
 // Route pour ajouter une nouvelle tâche
 app.post("/", async (req, res) => {
   try {
