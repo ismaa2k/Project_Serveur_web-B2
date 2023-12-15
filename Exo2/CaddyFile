@@ -3,5 +3,3 @@ todo.exemple.localhost {
 	file_server browse
 	reverse_proxy localhost:3000
 }
-
-

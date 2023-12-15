@@ -3,22 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="server.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="client.js" defer></script>
     <title>Todolist</title>
   </head>
   <body>
     <h1>Todolist</h1>
-    <ul>
-      <% tasks.forEach(task => { %>
-      <li><%= task.description %></li>
-      <% }); %>
-    </ul>
     <form action="/" method="post">
       <label for="description">Nouvelle tâche:</label>
       <input type="text" id="description" name="description" required />
       <button type="submit">Ajouter</button>
     </form>
-    
-    </form>
+    <div class="task-list">
+      <ul id="taskList">
+        <script>
+          fetch("/getTasks")
+            .then((response) => response.json())
+            .then((data) => {
+              const taskList = document.getElementById("taskList");
+              data.tasks.forEach((task) => {
+                const li = document.createElement("li");
+                li.textContent = task.description;
+
+                const deleteForm = document.createElement("form");
+                deleteForm.action = `/${task._id}`;
+                deleteForm.method = "POST";
+                deleteForm.innerHTML = `
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit">Supprimer</button>
+            `;
+
+                li.appendChild(deleteForm);
+                taskList.appendChild(li);
+              });
+            })
+            .catch((error) =>
+              console.error(
+                "Erreur lors de la récupération des tâches :",
+                error
+              )
+            );
+        </script>
+      </ul>
+    </div>
   </body>
 </html>

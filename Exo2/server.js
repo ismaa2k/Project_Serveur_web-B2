@@ -3,9 +3,13 @@ const mongoose = require("mongoose");
 const path = require("path");
 const app = express();
 const port = 3000;
-app.use(express.static(path.join(__dirname, "public")));
+
+const methodOverride = require("method-override");
+app.use(methodOverride("_method"));
+
 // Configuration du moteur de modèle EJS
-app.set("view engine", "ejs"); // Assurez-vous d'avoir installé EJS via npm/yarn
+app.set("view engine", "ejs"); // Utilisation de EJS comme moteur de modèle
+app.set("views", path.join(__dirname, "views")); // Chemin vers le répertoire des vues
 
 // Connexion à MongoDB
 mongoose.connect("mongodb://127.0.0.1/todolist", {
@@ -21,16 +25,40 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Route pour afficher la liste des tâches
-// Route pour afficher la liste des tâches
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+app.get("/getTasks", async (req, res) => {
+  try {
+    const tasks = await Task.find();
+    res.json({ tasks }); // Renvoie les tâches au format JSON
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur de serveur");
+  }
+});
+
+app.delete("/:taskId", async (req, res) => {
+  try {
+    const taskId = req.params.taskId;
+    await Task.findByIdAndRemove(taskId);
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur de serveur");
+  }
+});
 // Route pour ajouter une nouvelle tâche
 app.post("/", async (req, res) => {
-  const task = new Task({ description: req.body.description });
-  await task.save();
-  res.redirect("/");
+  try {
+    const task = new Task({ description: req.body.description });
+    await task.save();
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur de serveur");
+  }
 });
 
 // Démarrage du serveur
