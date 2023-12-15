@@ -1,8 +1,0 @@
-todo.exemple.localhost {
-	root * "C:\Users\ismaa\serveur-web\Exo3"
-	file_server browse
-	reverse_proxy localhost:4000
-
-}
-
-
